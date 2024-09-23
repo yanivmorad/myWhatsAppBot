@@ -47,6 +47,7 @@ app.get('/status', (req, res) => {
 });
 
 function startWhatsAppClient() {
+    clearAuthFolder();
     const client = new Client({
         puppeteer: {
             headless: true,
