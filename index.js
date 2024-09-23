@@ -47,13 +47,14 @@ app.get('/status', (req, res) => {
 });
 
 function startWhatsAppClient() {
-  const client = new Client({
-    puppeteer: {
-      headless: true,
-      args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-infobars', '--window-size=1280,800']
-    },
-    authStrategy: new LocalAuth()
-  });
+    const client = new Client({
+        puppeteer: {
+            headless: true,
+            args: ['--no-sandbox', '--disable-setuid-sandbox']
+        },
+        authStrategy: new LocalAuth()
+    });
+    
 
   client.on('qr', async (qr) => {
     qrCodeText = await qrcode.toDataURL(qr); // יצירת תמונת QR
