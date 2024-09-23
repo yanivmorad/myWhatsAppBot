@@ -4,6 +4,9 @@ const qrcode = require('qrcode');
 const { handleShoppingList } = require('./shoppingList.js');
 const { handleWeatherRequest } = require('./weather.js');
 
+const fs = require('fs');
+const path = require('path');
+
 const app = express();
 const port = process.env.PORT || 3000;
 
@@ -46,8 +49,8 @@ app.get('/status', (req, res) => {
   res.send(clientReady ? 'ready' : 'not ready');
 });
 
-const fs = require('fs');
-const path = require('path');
+
+
 
 function clearAuthFolder() {
     const authDir = path.join(__dirname, '.wwebjs_auth', 'session');
@@ -59,6 +62,7 @@ function clearAuthFolder() {
         }
     });
 }
+
 
 
 
