@@ -51,7 +51,7 @@ const path = require('path');
 
 function clearAuthFolder() {
     const authDir = path.join(__dirname, '.wwebjs_auth', 'session');
-    fs.rmdir(authDir, { recursive: true }, (err) => {
+    fs.rm(authDir, { recursive: true, force: true }, (err) => {
         if (err) {
             console.error('Failed to clear auth folder:', err);
         } else {
@@ -59,6 +59,7 @@ function clearAuthFolder() {
         }
     });
 }
+
 
 
 function startWhatsAppClient() {
