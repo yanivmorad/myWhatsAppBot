@@ -1,6 +1,7 @@
 {
  "dependencies": {
   "express": "^4.21.0",
+  "fs-extra": "^11.2.0",
   "puppeteer": "^23.4.0",
   "qrcode": "^1.4.4",
   "whatsapp-web.js": "^1.26.0"

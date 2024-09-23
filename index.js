@@ -3,8 +3,7 @@ const { Client, LocalAuth } = require('whatsapp-web.js');
 const qrcode = require('qrcode');
 const { handleShoppingList } = require('./shoppingList.js');
 const { handleWeatherRequest } = require('./weather.js');
-const puppeteer = require('puppeteer'); 
-
+const fs = require('fs-extra'); 
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -49,36 +48,25 @@ app.get('/status', (req, res) => {
 });
 
 function startWhatsAppClient() {
-    const client = new Client({
-        puppeteer: {
-            headless: true,
-            args: [
-              '--no-sandbox',
-              '--disable-setuid-sandbox',
-              '--disable-dev-shm-usage',
-              '--disable-accelerated-2d-canvas',
-              '--disable-gpu',
-              '--disable-extensions'
-            ]
-        },
-        authStrategy: new LocalAuth()
-    });
+  const authPath = './.wwebjs_auth/session/Default';
 
-    client.on('authenticated', (session) => {
-        console.log('WhatsApp client authenticated successfully!');
-    });
+  fs.removeSync(authPath);
+  console.log('Session directory cleaned.');
 
-    client.on('disconnected', (reason) => {
-        console.log('WhatsApp client disconnected:', reason);
-    });
-
-    client.on('auth_failure', (msg) => {
-        console.error('Authentication failed:', msg);
-    });
-    
-
-
-    
+  client = new Client({
+    puppeteer: {
+      headless: true,
+      args: [
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-dev-shm-usage',
+        '--disable-accelerated-2d-canvas',
+        '--disable-gpu',
+        '--disable-extensions'
+      ]
+    },
+    authStrategy: new LocalAuth()
+  });
 
   client.on('qr', async (qr) => {
     qrCodeText = await qrcode.toDataURL(qr); // יצירת תמונת QR
@@ -89,6 +77,22 @@ function startWhatsAppClient() {
     console.log('WhatsApp client is ready!');
     clientReady = true;
     client.sendMessage('972543514279@c.us', 'הבוט מוכן');
+  });
+
+  client.on('authenticated', (session) => {
+    console.log('WhatsApp client authenticated successfully!');
+  });
+
+  client.on('disconnected', (reason) => {
+    console.log('WhatsApp client disconnected:', reason);
+    if (reason === 'LOGOUT') {
+      console.log('Attempting to reinitialize the client...');
+      startWhatsAppClient(); // אתחול מחדש במצב של logout
+    }
+  });
+
+  client.on('auth_failure', (msg) => {
+    console.error('Authentication failed:', msg);
   });
 
   client.on('message_create', async (message) => {
@@ -119,7 +123,6 @@ function startWhatsAppClient() {
 }
 
 app.listen(port, () => {
-    console.log(`Server running at ${process.env.RENDER_EXTERNAL_URL || `http://localhost:${port}`}`);
-
+  console.log(`Server running at ${process.env.RENDER_EXTERNAL_URL || `http://localhost:${port}`}`);
   startWhatsAppClient();
 });
