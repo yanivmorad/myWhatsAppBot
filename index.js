@@ -55,13 +55,13 @@ app.get('/status', (req, res) => {
 function clearAuthFolder() {
     const authDir = path.join(__dirname, '.wwebjs_auth', 'session');
     fs.rm(authDir, { recursive: true, force: true }, (err) => {
-        if (err) {
-            console.error('Failed to clear auth folder:', err);
-        } else {
-            console.log('Auth folder cleared successfully.');
-        }
+      if (err) {
+        console.error('Failed to clear auth folder:', err);
+      } else {
+        console.log('Auth folder cleared successfully.');
+      }
     });
-}
+  }
 
 
 
@@ -71,10 +71,12 @@ function startWhatsAppClient() {
     const client = new Client({
         puppeteer: {
             headless: true,
+            executablePath: process.env.CHROME_BIN || '/usr/bin/chromium-browser',
             args: ['--no-sandbox', '--disable-setuid-sandbox']
         },
         authStrategy: new LocalAuth()
     });
+    
     
 
   client.on('qr', async (qr) => {
