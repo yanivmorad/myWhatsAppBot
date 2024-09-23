@@ -4,8 +4,6 @@ const qrcode = require('qrcode');
 const { handleShoppingList } = require('./shoppingList.js');
 const { handleWeatherRequest } = require('./weather.js');
 
-
-
 const app = express();
 const port = process.env.PORT || 3000;
 
@@ -13,7 +11,6 @@ let qrCodeText = '';
 let clientReady = false;
 let client;
 
-// הוסף את המספרים המורשים כאן
 const allowedNumbers = ['972543514279', '972503060517'];
 
 app.get('/', (req, res) => {
@@ -50,14 +47,14 @@ app.get('/status', (req, res) => {
 });
 
 function startWhatsAppClient() {
-    const client = new Client({
-        puppeteer: {
-          headless: true, // True for running without a GUI
-          args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-infobars', '--window-size=1280,800']
-        },
-        authStrategy: new LocalAuth()
-      });
-      
+  const client = new Client({
+    puppeteer: {
+      headless: true,
+      args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-infobars', '--window-size=1280,800']
+    },
+    authStrategy: new LocalAuth()
+  });
+
   client.on('qr', async (qr) => {
     qrCodeText = await qrcode.toDataURL(qr); // יצירת תמונת QR
     console.log('New QR code generated');
@@ -97,6 +94,7 @@ function startWhatsAppClient() {
 }
 
 app.listen(port, () => {
-  console.log(`Server running at http://localhost:${port}`);
+    console.log(`Server running at ${process.env.RENDER_EXTERNAL_URL || `http://localhost:${port}`}`);
+
   startWhatsAppClient();
 });
