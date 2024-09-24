@@ -7,8 +7,6 @@ const fs = require('fs-extra');
 const { MongoStore } = require('wwebjs-mongo');
 const mongoose = require('mongoose');
 require('dotenv').config({ path: './config.env' });
-const express = require('express');
-const mongoose = require('mongoose');
 
 const app = express();
 const port = process.env.PORT || 3000;
