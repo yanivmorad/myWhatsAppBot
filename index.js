@@ -1,34 +1,31 @@
 const express = require('express');
+const mongoose = require('mongoose');
 const { Client, RemoteAuth } = require('whatsapp-web.js');
+const { MongoStore } = require('wwebjs-mongo');
 const qrcode = require('qrcode');
 const { handleShoppingList } = require('./shoppingList.js');
 const { handleWeatherRequest } = require('./weather.js');
-const fs = require('fs-extra');
-const { MongoStore } = require('wwebjs-mongo');
-const mongoose = require('mongoose');
-require('dotenv').config({ path: './config.env' });
 
 const app = express();
 const port = process.env.PORT || 3000;
 
-const MONGODB_URI = process.env.MONGODB_URI;
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://yanivmorad10:yaniv1212@redertry.jxlau.mongodb.net/?retryWrites=true&w=majority&appName=rederTry';
 
-// התחברות למונגו
-mongoose.connect(MONGODB_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true
-})
-.then(() => console.log('Connected to MongoDB'))
-.catch(err => console.error('Failed to connect to MongoDB', err));
-
-// שאר הקוד שלך...
 let qrCodeText = '';
 let clientReady = false;
 let client;
 
 const allowedNumbers = ['972543514279', '972503060517'];
 
-// MongoDB connection (replace with your MongoDB URI)
+async function connectMongoDB() {
+    try {
+        await mongoose.connect(MONGODB_URI);
+        console.log('Connected to MongoDB');
+    } catch (err) {
+        console.error('MongoDB connection error:', err);
+        process.exit(1);
+    }
+}
 
 app.get('/', (req, res) => {
   if (clientReady) {
@@ -65,9 +62,8 @@ app.get('/status', (req, res) => {
 
 async function startWhatsAppClient() {
   try {
-    await mongoose.connect(MONGODB_URI);
     const store = new MongoStore({ mongoose: mongoose });
-
+    
     client = new Client({
       puppeteer: {
         headless: true,
@@ -104,9 +100,8 @@ async function startWhatsAppClient() {
     client.on('disconnected', async (reason) => {
       console.log('WhatsApp client disconnected:', reason);
       clientReady = false;
-      await new Promise(resolve => setTimeout(resolve, 5000)); // Wait for 5 seconds
-      console.log('Attempting to reinitialize the client...');
-      await startWhatsAppClient();
+      await new Promise(resolve => setTimeout(resolve, 5000));
+      startWhatsAppClient();
     });
 
     client.on('auth_failure', (msg) => {
@@ -142,12 +137,17 @@ async function startWhatsAppClient() {
   } catch (error) {
     console.error('Failed to initialize WhatsApp client:', error);
     qrCodeText = 'Error: Failed to initialize WhatsApp client. Please check the logs.';
-    await new Promise(resolve => setTimeout(resolve, 10000)); // Wait for 10 seconds before retrying
-    await startWhatsAppClient();
+    await new Promise(resolve => setTimeout(resolve, 10000));
+    startWhatsAppClient();
   }
 }
 
-app.listen(port, () => {
-  console.log(`Server running at ${process.env.RENDER_EXTERNAL_URL || `http://localhost:${port}`}`);
-  startWhatsAppClient();
-});
+async function main() {
+  await connectMongoDB();
+  app.listen(port, () => {
+    console.log(`Server running at ${process.env.RENDER_EXTERNAL_URL || `http://localhost:${port}`}`);
+    startWhatsAppClient();
+  });
+}
+
+main().catch(console.error);
