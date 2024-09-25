@@ -10,12 +10,12 @@
   "wwebjs-mongo": "^1.1.0"
  },
  "engines": {
-  "node": "22.x"
+   "node": ">=18.0.0"
 
  },
  "scripts": {
   
-  "start": "node try.js"
+  "start": "node index.js"
  },
  "repository": {
   "type": "git",
